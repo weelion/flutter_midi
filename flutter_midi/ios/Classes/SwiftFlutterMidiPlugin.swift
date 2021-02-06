@@ -33,10 +33,7 @@ public class SwiftFlutterMidiPlugin: NSObject, FlutterPlugin {
         result(message)
       case "unmute":
         do {
-            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback, with: .mixWithOthers)
-            NSLog("Playback OK")
-            try AVAudioSession.sharedInstance().setActive(true)
-            NSLog("Session is Active")
+            AVAudioSession.sharedInstance().setCategory(convertFromAVAudioSessionCategory(AVAudioSession.Category.playback), with: .mixWithOthers)
         } catch {
             print(error)
         }
@@ -59,4 +56,9 @@ public class SwiftFlutterMidiPlugin: NSObject, FlutterPlugin {
         break
     }
   }
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromAVAudioSessionCategory(_ input: AVAudioSession.Category) -> String {
+  return input.rawValue
 }
