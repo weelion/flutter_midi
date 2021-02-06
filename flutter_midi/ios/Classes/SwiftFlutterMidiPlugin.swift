@@ -33,9 +33,17 @@ public class SwiftFlutterMidiPlugin: NSObject, FlutterPlugin {
         result(message)
       case "unmute":
         do {
-            AVAudioSession.sharedInstance().setCategory(convertFromAVAudioSessionCategory(AVAudioSession.Category.playback), with: .mixWithOthers)
+            if #available(iOS 10.0, *) {
+                try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [])
+            } else {
+                // Set category with options (iOS 9+) setCategory(_:options:)
+                AVAudioSession.sharedInstance().perform(NSSelectorFromString("setCategory:withOptions:error:"), with: AVAudioSession.Category.playback, with:  [])
+                
+                // Set category without options (<= iOS 9) setCategory(_:)
+                AVAudioSession.sharedInstance().perform(NSSelectorFromString("setCategory:error:"), with: AVAudioSession.Category.playback)
+            }
         } catch {
-            print(error)
+            NSLog("ERROR: CANNOT PLAY MUSIC IN BACKGROUND. Message from code: \"\(error)\"")
         }
         let message = "unmuted Device"
         result(message)
@@ -58,7 +66,4 @@ public class SwiftFlutterMidiPlugin: NSObject, FlutterPlugin {
   }
 }
 
-// Helper function inserted by Swift 4.2 migrator.
-fileprivate func convertFromAVAudioSessionCategory(_ input: AVAudioSession.Category) -> String {
-  return input.rawValue
-}
+
